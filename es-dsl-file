@@ -1,0 +1,113 @@
+1. Login Query
+
+GET /json-c360-authentication*/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "record.UserAgent.keyword": "MOBILE" }},
+        { "term": { "record.USERTYPE.keyword": "B" }},
+        { "term": { "record.appName.keyword": "universal-customer-login-api" }},
+        { "term": { "record.AGREGATOR_bool.keyword": "false" }}
+      ]
+    }
+  }
+}
+
+
+2. Fund Transfer Query
+
+GET /json-c360-authentication*/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "record.CONTEXT_PATH": "/bank/deposits/pay/transfer/create/v1/create" }},
+        { "term": { "record.appName": "auth-edge-router-bank-deposits" }},
+        { "term": { "record.AGREGATOR": "false" }},
+        { "term": { "record.Client": "Mobile-App" }}
+      ]
+    }
+  }
+}
+
+
+3. Bill Pay Query
+
+GET /json-c360-authentication*/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "record.CONTEXT_PATH": "/bank/deposits/pay/billpay/customer/v1/enroll" }},
+        { "term": { "record.appName": "auth-edge-router-bank-deposits" }},
+        { "term": { "record.AGREGATOR": "false" }},
+        { "term": { "record.Client": "Mobile-App" }}
+      ]
+    }
+  }
+}
+
+
+4. Mobile Check Deposit Query
+
+GET /json-c360-authentication*/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "kubernetes.namespace": "mobile-check-deposit-prod" }},
+        { "terms": { "message.keyword": ["Enrollment status requested", "Enroll operation requested", "Deposit limit requested", "Verify deposit requested", "Submit deposit requested"] }}
+      ]
+    }
+  }
+}
+
+
+5. Statements Query
+
+GET /json-c360-authentication*/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "record.CONTEXT_PATH": "/bank/deposits/servicing/documents/v1/accounts/*/statements/*" }},
+        { "term": { "record.appName": "auth-edge-router-bank-deposits" }},
+        { "term": { "record.AGREGATOR": "false" }}
+      ]
+    }
+  }
+}
+
+
+
+
+6. Zelle Pay Query
+
+GET /json-c360-authentication*/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "record.CONTEXT_PATH": "/bank/deposits/pay/zelle/v1/enrollment" }},
+        { "term": { "record.appName": "auth-edge-router-bank-deposits" }},
+        { "term": { "record.AGREGATOR": "false" }},
+        { "bool": {
+            "should": [
+              { "match_phrase": { "message": "X-Client-Platform : Android" }},
+              { "match_phrase": { "message": "X-Client-Platform : iPhone" }},
+              { "match_phrase": { "message": "X-Client-Platform : iPad" }},
+              { "match_phrase": { "message": "X-Client-Platform : Android_Tablet" }}
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
