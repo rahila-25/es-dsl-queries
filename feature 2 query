@@ -72,7 +72,7 @@ GET json-verus-engineering-*/_search?filter_path=aggregations.count
 
 
 
-funds transfer 
+mobile check deposit 
 
 GET logs-*/_search?filter_path=aggregations.count
 {
@@ -122,3 +122,62 @@ GET logs-*/_search?filter_path=aggregations.count
     }
   }
 }
+
+
+
+
+
+
+
+statemnts
+
+
+
+GET json-c360-authentication-*/_search?filter_path=aggregations.count
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "record.CONTEXT_PATH.keyword": "/bank/deposits/servicing/documents/v1/accounts/*/statements/*"
+          }
+        },
+        {
+          "term": {
+            "record.appName.keyword": "auth-edge-router-bank-deposits"
+          }
+        },
+        {
+          "term": {
+            "record.AGGREGATOR_bool.keyword": "false"
+          }
+        },
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "now-4h",
+              "lte": "now"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "unique_users_buckets": {
+      "terms": {
+        "field": "record.REGID.keyword",
+        "size": 100000,
+        "shard_size": 100000
+      }
+    },
+    "count": {
+      "stats_bucket": {
+        "buckets_path": "unique_users_buckets._count"
+      }
+    }
+  }
+}
+
