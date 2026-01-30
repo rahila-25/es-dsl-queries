@@ -179,4 +179,65 @@ GET json-verus-engineering-*/_search?filter_path=aggregations.count
       }
     }
   }
+
+
+
+
+zelle 
+
+
+GET json-verus-engineering-*/_search?filter_path=aggregations.count
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "record.CONTEXT_PATH.keyword": "/bank/deposits/pay/zelle/v1/enrollment" } },
+        { "term": { "record.appName.keyword": "auth-edge-router-bank-deposits" } },
+        { "term": { "record.AGGREGATOR.keyword": "false" } },
+        {
+          "bool": {
+            "should": [
+              { "match": { "message": "X-Client-Platform : Android" } },
+              { "match": { "message": "X-Client-Platform : iPhone" } },
+              { "match": { "message": "X-Client-Platform : iPad" } },
+              { "match": { "message": "X-Client-Platform : Android_Tablet" } }
+            ],
+            "minimum_should_match": 1
+          }
+        },
+        {
+          "range": {
+            "record.HTTP_STATUS_CODE_int": {
+              "gte": 500,
+              "lte": 599
+            }
+          }
+        },
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "now-15m",
+              "lt": "now"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "unique_users_buckets": {
+      "terms": {
+        "field": "Cust-Reg-ID.keyword",
+        "size": 100000,
+        "shard_size": 100000
+      }
+    },
+    "count": {
+      "stats_bucket": {
+        "buckets_path": "unique_users_buckets._count"
+      }
+    }
+  }
+}
 }
