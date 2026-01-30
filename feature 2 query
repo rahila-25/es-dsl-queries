@@ -133,32 +133,32 @@ statemnts
 
 
 
-GET json-c360-authentication-*/_search?filter_path=aggregations.count
+GET json-verus-engineering-*/_search?filter_path=aggregations.count
 {
   "size": 0,
   "query": {
     "bool": {
       "must": [
-        {
-          "term": {
-            "record.CONTEXT_PATH.keyword": "/bank/deposits/servicing/documents/v1/accounts/*/statements/*"
-          }
+        { 
+          "wildcard": { 
+            "record.CONTEXT_PATH.keyword": "/bank/deposits/servicing/documents/v1/accounts//statements/" 
+          } 
         },
+        { "term": { "record.appName.keyword": "auth-edge-router-bank-deposits" } },
+        { "term": { "record.AGGREGATOR.keyword": "false" } },
         {
-          "term": {
-            "record.appName.keyword": "auth-edge-router-bank-deposits"
-          }
-        },
-        {
-          "term": {
-            "record.AGGREGATOR_bool.keyword": "false"
+          "range": {
+            "record.HTTP_STATUS_CODE_int": {
+              "gte": 500,
+              "lte": 599
+            }
           }
         },
         {
           "range": {
             "@timestamp": {
-              "gte": "now-4h",
-              "lte": "now"
+              "gte": "now-15m",
+              "lt": "now"
             }
           }
         }
@@ -168,7 +168,7 @@ GET json-c360-authentication-*/_search?filter_path=aggregations.count
   "aggs": {
     "unique_users_buckets": {
       "terms": {
-        "field": "record.REGID.keyword",
+        "field": "Cust-Reg-ID.keyword",
         "size": 100000,
         "shard_size": 100000
       }
@@ -180,4 +180,3 @@ GET json-c360-authentication-*/_search?filter_path=aggregations.count
     }
   }
 }
-
