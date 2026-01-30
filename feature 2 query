@@ -1,0 +1,60 @@
+GET json-verus-engineering-*/_search?filter_path=aggregations.count
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "wildcard": {
+            "record.CONTEXT_PATH": "/bank/deposits/pay/transfer/create/v1/create"
+          }
+        },
+        {
+          "term": {
+            "record.appName": "auth-edge-router-bank-deposits"
+          }
+        },
+        {
+          "term": {
+            "record.AGGREGATOR": "false"
+          }
+        },
+        {
+          "term": {
+            "record.Client": "Mobile-App"
+          }
+        },
+        {
+          "range": {
+            "record.HTTP_STATUS_CODE_int": {
+              "gte": 500,
+              "lte": 599
+            }
+          }
+        },
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "now-15m",
+              "lt": "now"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "unique_users_buckets": {
+      "terms": {
+        "field": "Cust-Reg-ID.keyword",
+        "size": 100000,
+        "shard_size": 100000
+      }
+    },
+    "count": {
+      "stats_bucket": {
+        "buckets_path": "unique_users_buckets._count"
+      }
+    }
+  }
+}
