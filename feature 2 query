@@ -58,3 +58,67 @@ GET json-verus-engineering-*/_search?filter_path=aggregations.count
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+funds transfer 
+
+GET logs-*/_search?filter_path=aggregations.count
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        { 
+          "term": { 
+            "kubernetes.namespace.keyword": "mobile-check-deposit-prod" 
+          } 
+        },
+        {
+          "terms": {
+            "message.keyword": [
+              "Enrollment status requested",
+              "Enroll operation requested",
+              "Deposit limit requested",
+              "Verify deposit requested",
+              "Submit deposit requested"
+            ]
+          }
+        },
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "now-15m",
+              "lt": "now"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "unique_users_buckets": {
+      "terms": {
+        "field": "cifId.keyword",
+        "size": 100000,
+        "shard_size": 100000
+      }
+    },
+    "count": {
+      "stats_bucket": {
+        "buckets_path": "unique_users_buckets._count"
+      }
+    }
+  }
+}
