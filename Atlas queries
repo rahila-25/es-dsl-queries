@@ -106,7 +106,6 @@ GET json-call-center-bank-org-*/_search
 
 
 
-GET json-call-center-bank-org-*/_search
 {
   "size": 0,
   "query": {
@@ -114,7 +113,7 @@ GET json-call-center-bank-org-*/_search
       "must": [
         { "term": { "record.dd.env.keyword": "prod" } },
         { "term": { "record.appName.keyword": "bank-atlas-platform-router" } },
-        { "wildcard": { "record.CONTEXT_PATH.keyword": "*/dropdown/v1/data/dropdowns" } },
+        { "wildcard": { "record.CONTEXT_PATH.keyword": "*dropdown/v1/data/dropdowns*" } },
         { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 } } }
       ]
     }
@@ -130,6 +129,11 @@ GET json-call-center-bank-org-*/_search
         "disruption_count": {
           "value_count": {
             "field": "_index"
+          }
+        },
+        "unique_count": {
+          "cardinality": {
+            "field": "record.racf.keyword"
           }
         }
       }
@@ -159,6 +163,19 @@ GET json-call-center-bank-org-*/_search
           "cardinality": {
             "field": "record.racf.keyword",
             "precision_threshold": 40000
+          }
+        }
+      }
+    },
+    "unique_request_ids": {
+      "terms": {
+        "field": "record.context.RequestId.keyword",
+        "size": 10000
+      },
+      "aggs": {
+        "count": {
+          "stats_bucket": {
+            "buckets_path": "unique_request_ids._count"
           }
         }
       }
