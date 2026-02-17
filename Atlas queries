@@ -106,15 +106,16 @@ GET json-call-center-bank-org-*/_search
 
 
 
+GET /json-call-center-bank-org-*/_search
 {
   "size": 0,
   "query": {
     "bool": {
       "must": [
-        { "term": { "record.dd.env.keyword": "prod" } },
-        { "term": { "record.appName.keyword": "bank-atlas-platform-router" } },
-        { "wildcard": { "record.CONTEXT_PATH.keyword": "*dropdown/v1/data/dropdowns*" } },
-        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 } } }
+        { "term": { "record.dd.env.keyword": "prod" }},
+        { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
+        { "wildcard": { "record.CONTEXT_PATH.keyword": "*dropdown/v1/data/dropdowns*" }},
+        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}}
       ]
     }
   },
@@ -122,8 +123,8 @@ GET json-call-center-bank-org-*/_search
     "by_racf": {
       "terms": {
         "field": "record.racf.keyword",
-        "size": 100000,
-        "shard_size": 100000
+        "size": 10000,
+        "shard_size": 10000
       },
       "aggs": {
         "disruption_count": {
@@ -135,34 +136,10 @@ GET json-call-center-bank-org-*/_search
           "cardinality": {
             "field": "record.racf.keyword"
           }
-        }
-      }
-    },
-    "unknown_disruptions": {
-      "filter": {
-        "term": { "record.racf.keyword": "unknown" }
-      },
-      "aggs": {
-        "count": {
-          "value_count": {
+        },
+        "disruption_stats": {
+          "stats": {
             "field": "_index"
-          }
-        }
-      }
-    },
-    "known_agents": {
-      "filter": {
-        "bool": {
-          "must_not": {
-            "term": { "record.racf.keyword": "unknown" }
-          }
-        }
-      },
-      "aggs": {
-        "unique_count": {
-          "cardinality": {
-            "field": "record.racf.keyword",
-            "precision_threshold": 40000
           }
         }
       }
@@ -173,9 +150,14 @@ GET json-call-center-bank-org-*/_search
         "size": 10000
       },
       "aggs": {
-        "count": {
-          "stats_bucket": {
-            "buckets_path": "unique_request_ids._count"
+        "request_count": {
+          "value_count": {
+            "field": "_index"
+          }
+        },
+        "request_stats": {
+          "stats": {
+            "field": "_index"
           }
         }
       }
