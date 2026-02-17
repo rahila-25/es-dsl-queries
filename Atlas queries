@@ -1,0 +1,97 @@
+GET json-call-center-bank-org-*/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "record.dd.env.keyword": "prod" }},
+        { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
+        { "wildcard": { "record.CONTEXT_PATH.keyword": "*dropdown/v1/data/dropdowns*" }},
+        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}}
+      ]
+    }
+  },
+  "aggs": {
+    "disruption_count": {
+      "terms": { "field": "record.racf.keyword" },
+      "aggs": {
+        "racf_appended": { "scripted_metric": {
+          "init_script": "state.racf = ''",
+          "map_script": "state.racf = doc['record.racf.keyword'].value + '_'",
+          "combine_script": "state.racf",
+          "reduce_script": "return state.racf"
+        }},
+        "unknown_count": {
+          "bucket_script": {
+            "buckets_path": {
+              "disruption_count": "disruption_count"
+            },
+            "script": "params.disruption_count == 'unknown' ? 1 : 0"
+          }
+        }
+      }
+    },
+    "unique_agent_impacted_count": {
+      "max": { "field": "agentcount" }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+second query:
+
+GET json-call-center-bank-org-*/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "record.dd.env.keyword": "prod" }},
+        { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
+        { "wildcard": { "record.CONTEXT_PATH.keyword": "*dropdown/v1/data/dropdowns*" }},
+        { "wildcard": { "url.keyword": "*43,23_SECTOR_CODE&lob*" }},
+        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}}
+      ],
+      "must_not": [
+        { "wildcard": { "url.keyword": "*43,23_SECTOR_CODE&lob*" }}
+      ]
+    }
+  },
+  "aggs": {
+    "disruption_count": {
+      "terms": { "field": "record.racf.keyword" },
+      "aggs": {
+        "unknown_count": {
+          "bucket_script": {
+            "buckets_path": {
+              "disruption_count": "disruption_count"
+            },
+            "script": "params.disruption_count == 'unknown' ? 1 : 0"
+          }
+        },
+        "agent_count": {
+          "bucket_script": {
+            "buckets_path": {
+              "disruption_count": "disruption_count"
+            },
+            "script": "params.disruption_count != 'unknown' ? 1 : 0"
+          }
+        }
+      }
+    },
+    "customer_impacted_count": {
+      "sum": { "field": "agentcount" }
+    }
+  }
+}
