@@ -1,19 +1,57 @@
 GET /json-call-center-bank-org-*/_search
 {
-  "size": 5,
-  "_source": [
-    "record.context",
-    "record.context.RequestId",
-    "record.context.RequestId.keyword"
-  ],
+  "size": 0,
   "query": {
     "bool": {
-      "must": [
-        { "term": { "record.dd.env.keyword": "prod" }},
-        { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
-        { "wildcard": { "record.CONTEXT_PATH.keyword": "*dropdown/v1/data/dropdowns*" }},
+      "filter": [
+        { "term": { "record.dd.env": "prod" }},
+        { "term": { "record.appName": "bank-atlas-platform-router" }},
+        { "wildcard": { "record.CONTEXT_PATH": "**/dropdown/v1/data/dropdowns" }},
         { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}}
       ]
+    }
+  },
+  "aggs": {
+    "racf_stats": {
+      "terms": {
+        "field": "record.racf",
+        "size": 1000
+      },
+      "aggs": {
+        "disruptioncount": {
+          "value_count": {
+            "field": "record.racf"
+          }
+        },
+        "racfappend": {
+          "bucket_script": {
+            "buckets_path": {
+              "racfconcat": "_term"
+            },
+            "script": "return params.racfconcat + '_'"
+          }
+        },
+        "racftrim": {
+          "terms": {
+            "field": "record.racf"
+          }
+        },
+        "unique_count": {
+          "cardinality": {
+            "field": "record.racf"
+          }
+        },
+        "agentcount": {
+          "value_count": {
+            "field": "record.racf"
+          }
+        }
+      }
+    },
+    "unique_request_ids_count": {
+      "stats": {
+        "field": "record.context.RequestId.keyword"
+      }
     }
   }
 }
