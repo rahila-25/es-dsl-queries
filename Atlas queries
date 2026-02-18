@@ -1,6 +1,11 @@
 GET /json-call-center-bank-org-*/_search
 {
-  "size": 0,
+  "size": 5,
+  "_source": [
+    "record.context",
+    "record.context.RequestId",
+    "record.context.RequestId.keyword"
+  ],
   "query": {
     "bool": {
       "must": [
@@ -10,45 +15,5 @@ GET /json-call-center-bank-org-*/_search
         { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}}
       ]
     }
-  },
-  "aggs": {
-
-    "data": {
-      "stats": {
-        "field": "record.HTTP_STATUS_CODE_int"
-      }
-    },
-
-    "total_count_before_dedup": {
-      "value_count": {
-        "field": "record.context.RequestId.keyword"
-      }
-    },
-
-    "unique_count_after_dedup": {
-      "cardinality": {
-        "field": "record.context.RequestId.keyword"
-      }
-    },
-
-    "by_racf": {
-      "terms": {
-        "field": "record.racf.keyword",
-        "size": 10000
-      },
-      "aggs": {
-        "disruption_count": {
-          "value_count": {
-            "field": "record.context.RequestId.keyword"
-          }
-        },
-        "unique_per_racf": {
-          "cardinality": {
-            "field": "record.context.RequestId.keyword"
-          }
-        }
-      }
-    }
-
   }
 }
