@@ -24,26 +24,19 @@ GET /json-call-center-bank-org-*/_search
           }
         },
         "racfappend": {
-          "terms": {
-            "field": "record.racf.keyword",
-            "size": 1000
-          },
-          "aggs": {
-            "concatenated_racf": {
-              "bucket_script": {
-                "buckets_path": {
-                  "racfconcat": "_key"
-                },
-                "script": {
-                  "source": "params.racfconcat + '_'"
-                }
-              }
+          "bucket_script": {
+            "buckets_path": {
+              "racfconcat": "_key"  // Referring to the key value of the terms aggregation
+            },
+            "script": {
+              "source": "params.racfconcat + '_'"  // Concatenate with '_'
             }
           }
         },
         "racftrim": {
           "terms": {
-            "field": "record.racf.keyword"
+            "field": "record.racf.keyword",
+            "size": 1000
           }
         },
         "unique_count": {
