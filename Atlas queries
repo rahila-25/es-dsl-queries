@@ -14,36 +14,46 @@ GET /json-call-center-bank-org-*/_search
   "aggs": {
     "racf_stats": {
       "terms": {
-        "field": "record.racf",
+        "field": "record.racf.keyword",
         "size": 1000
       },
       "aggs": {
         "disruptioncount": {
           "value_count": {
-            "field": "record.racf"
+            "field": "record.racf.keyword"
           }
         },
         "racfappend": {
-          "bucket_script": {
-            "buckets_path": {
-              "racfconcat": "_term"
-            },
-            "script": "return params.racfconcat + '_'"
+          "terms": {
+            "field": "record.racf.keyword",
+            "size": 1000
+          },
+          "aggs": {
+            "concatenated_racf": {
+              "bucket_script": {
+                "buckets_path": {
+                  "racfconcat": "_key"
+                },
+                "script": {
+                  "source": "params.racfconcat + '_'"
+                }
+              }
+            }
           }
         },
         "racftrim": {
           "terms": {
-            "field": "record.racf"
+            "field": "record.racf.keyword"
           }
         },
         "unique_count": {
           "cardinality": {
-            "field": "record.racf"
+            "field": "record.racf.keyword"
           }
         },
         "agentcount": {
           "value_count": {
-            "field": "record.racf"
+            "field": "record.racf.keyword"
           }
         }
       }
