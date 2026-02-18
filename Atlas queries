@@ -13,6 +13,12 @@ GET /json-call-center-bank-org-*/_search
   },
   "aggs": {
 
+    "data": {
+      "stats": {
+        "field": "record.HTTP_STATUS_CODE_int"
+      }
+    },
+
     "total_count_before_dedup": {
       "value_count": {
         "field": "record.context.RequestId.keyword"
@@ -25,9 +31,22 @@ GET /json-call-center-bank-org-*/_search
       }
     },
 
-    "data": {
-      "stats": {
-        "field": "record.HTTP_STATUS_CODE_int"
+    "by_racf": {
+      "terms": {
+        "field": "record.racf.keyword",
+        "size": 10000
+      },
+      "aggs": {
+        "disruption_count": {
+          "value_count": {
+            "field": "record.context.RequestId.keyword"
+          }
+        },
+        "unique_per_racf": {
+          "cardinality": {
+            "field": "record.context.RequestId.keyword"
+          }
+        }
       }
     }
 
