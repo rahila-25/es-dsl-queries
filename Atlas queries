@@ -17,16 +17,11 @@ POST json-call-center-bank-org-*/_search
   "aggs": {
     "unique_request_ids": {
       "terms": {
-        "field": "record.context.RequestId.keyword",
+        "field": "record.finaleRequestId.keyword",
         "size": 10000
       }
     },
-    "unique_request_count": {
-      "cardinality": {
-        "field": "record.context.RequestId.keyword"
-      }
-    },
-    "request_stats": {
+    "data": {
       "stats_bucket": {
         "buckets_path": "unique_request_ids._count"
       }
