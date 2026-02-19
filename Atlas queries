@@ -1,21 +1,34 @@
-GET /json-call-center-bank-org-*/_search
+POST json-call-center-bank-org-*/_search
 {
   "size": 0,
   "query": {
     "bool": {
-      "filter": [
-        { "term": { "record.dd.env": "prod" }},
-        { "term": { "record.appName": "bank-atlas-platform-router" }},
-        { "wildcard": { "record.CONTEXT_PATH": "*dropdown*/v1/data/dropdowns" }},
+      "must": [
+        { "term": { "record.dd.env.keyword": "prod" }},
+        { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
+        { "wildcard": { "record.CONTEXT_PATH.keyword": "*\/dropdown\/v1\/data\/dropdowns*" }},
         { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}}
+      ],
+      "must_not": [
+        { "wildcard": { "record.message.keyword": "*SERVICING_NOTES&lob=DPLN*" }}
       ]
     }
   },
   "aggs": {
-    "uniqueCustomerImpacted": {
+    "unique_request_ids": {
       "terms": {
-        "field": "UniqueCustomerImpacted",
-        "size": 1000
+        "field": "record.context.RequestId.keyword",
+        "size": 10000
+      }
+    },
+    "unique_request_count": {
+      "cardinality": {
+        "field": "record.context.RequestId.keyword"
+      }
+    },
+    "request_stats": {
+      "stats_bucket": {
+        "buckets_path": "unique_request_ids._count"
       }
     }
   }
