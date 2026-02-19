@@ -1,4 +1,4 @@
-POST json-call-center-bank-org-*/_search
+POST json-call-center-bank-org-*/_search?filter_path=aggregations.data
 {
   "size": 0,
   "query": {
@@ -15,7 +15,7 @@ POST json-call-center-bank-org-*/_search
     }
   },
   "aggs": {
-    "unique_request_ids": {
+    "unique_ids": {
       "terms": {
         "field": "record.finaleRequestId",
         "size": 10000
@@ -23,7 +23,7 @@ POST json-call-center-bank-org-*/_search
     },
     "data": {
       "stats_bucket": {
-        "buckets_path": "unique_request_ids._count"
+        "buckets_path": "unique_ids._count"
       }
     }
   }
