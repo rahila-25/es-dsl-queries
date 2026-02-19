@@ -14,7 +14,8 @@ GET /json-call-center-bank-org-*/_search
   "aggs": {
     "uniqueCustomerImpacted": {
       "terms": {
-        "field": "UniqueCustomerImpacted"
+        "field": "UniqueCustomerImpacted",
+        "size": 1000
       }
     }
   }
