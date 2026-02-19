@@ -1,29 +1,43 @@
-POST json-call-center-bank-org-*/_search
 {
   "size": 0,
   "query": {
     "bool": {
-      "must": [
-        { "term": { "record.dd.env.keyword": "prod" }},
-        { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
-        { "wildcard": { "record.CONTEXT_PATH.keyword": "*\/dropdown\/v1\/data\/dropdowns*" }},
-        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}}
+      "filter": [
+        { "term": { "record.dd.env.keyword": "prod" } },
+        { "term": { "record.appName.keyword": "bank-atlas-platform-router" } },
+        { "wildcard": { "record.CONTEXT_PATH.keyword": "*/dropdown/V1/data/dropdowns*" } },
+        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 } } }
       ],
       "must_not": [
-        { "wildcard": { "record.message.keyword": "*SERVICING_NOTES&lob=DPLN*" }}
+        { "wildcard": { "url.keyword": "*SERVICING_NOTES&blob=DPLM*" } },
+        { "wildcard": { "url.keyword": "*43,23,SECTOR_CODE&blob*" } }
       ]
     }
   },
   "aggs": {
-    "unique_request_ids": {
-      "terms": {
-        "field": "record.finaleRequestId.keyword",
-        "size": 10000
+    "total_events": {
+      "value_count": {
+        "field": "record.cif.keyword"
       }
     },
-    "data": {
-      "stats_bucket": {
-        "buckets_path": "unique_request_ids._count"
+    "unique_customers": {
+      "cardinality": {
+        "field": "record.cif.keyword"
+      }
+    },
+    "sum_disruptions": {
+      "sum": {
+        "field": "disruptioncount"
+      }
+    },
+    "max_disruption": {
+      "max": {
+        "field": "disruptioncount"
+      }
+    },
+    "min_disruption": {
+      "min": {
+        "field": "disruptioncount"
       }
     }
   }
