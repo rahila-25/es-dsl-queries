@@ -8,13 +8,22 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations
         { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
         { "wildcard": { "record.CONTEXT_PATH.keyword": "*/dropdown/v1/data/dropdowns*" }},
         { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}}
+      ],
+      "must_not": [
+        { "term": { "record.racfid.keyword": "unknown" }}
       ]
     }
   },
   "aggs": {
-    "unique_agents": {
-      "cardinality": {
-        "field": "record.racfid.keyword"
+    "group_by_agent": {
+      "terms": {
+        "field": "record.racfid.keyword",
+        "size": 10000
+      }
+    },
+    "data": {
+      "stats_bucket": {
+        "buckets_path": "group_by_agent._count"
       }
     }
   }
