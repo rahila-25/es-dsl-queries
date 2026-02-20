@@ -1,13 +1,21 @@
-For Discover, I completed and validated 5 out of 8 features and ensured the impact metrics are accurate. The remaining ones are pending app team approval.
-
-IVR is blocked due to missing identifiers, and I’ve been actively working with the team to resolve it. Card Acquisition is still awaiting response despite my follow-ups.
-
-For Atlas, I converted and validated the queries and aligned on next steps as the team considers a dashboard approach.
-
-On Pulse, I identified the DB performance risk and suggested exploring Splunk as a safer alternative. We’re currently waiting on confirmation and Snowflake access.
-
-In parallel, I streamlined the ES DSL structure across applications and progressed the Full Volume Publisher work.
-
-overall things are moving and new apps are getting added to work streams
-
-Things to improve: some app teams are not responding on time and we have to chase it down and escalate the issue which should be avoided
+GET json-call-center-bank-org-*/_search?filter_path=aggregations
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "record.dd.env.keyword": "prod" }},
+        { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
+        { "wildcard": { "record.CONTEXT_PATH.keyword": "*/dropdown/v1/data/dropdowns*" }},
+        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}}
+      ]
+    }
+  },
+  "aggs": {
+    "unique_agents": {
+      "cardinality": {
+        "field": "record.racfid.keyword"
+      }
+    }
+  }
+}
