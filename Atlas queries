@@ -1,6 +1,22 @@
 GET json-call-center-bank-org-*/_search?filter_path=aggregations
 {
   "size": 0,
+
+  "runtime_mappings": {
+    "racftrim": {
+      "type": "keyword",
+      "script": """
+        if (doc.containsKey('record.message.keyword') && !doc['record.message.keyword'].empty) {
+          String msg = doc['record.message.keyword'].value;
+          def matcher = /[a-zA-Z0-9]+/.matcher(msg);
+          if (matcher.find()) {
+            emit(matcher.group());
+          }
+        }
+      """
+    }
+  },
+
   "query": {
     "bool": {
       "must": [
@@ -8,16 +24,14 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations
         { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
         { "wildcard": { "record.CONTEXT_PATH.keyword": "*/dropdown/v1/data/dropdowns*" }},
         { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}}
-      ],
-      "must_not": [
-        { "term": { "record.racfid.keyword": "unknown" }}
       ]
     }
   },
+
   "aggs": {
     "group_by_agent": {
       "terms": {
-        "field": "record.racfid.keyword",
+        "field": "racftrim",
         "size": 10000
       }
     },
