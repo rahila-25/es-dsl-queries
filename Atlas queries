@@ -12,15 +12,15 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations
     }
   },
   "aggs": {
-    "group_by_agent": {
+    "group_by_racf": {
       "terms": {
-        "field": "record.racfid.keyword",
+        "field": "record.racf.keyword",
         "size": 10000
       }
     },
-    "data": {
-      "stats_bucket": {
-        "buckets_path": "group_by_agent._count"
+    "uniqueAgentImpacted": {
+      "cardinality": {
+        "field": "record.racf.keyword"
       }
     }
   }
