@@ -1,4 +1,4 @@
-GET json-call-center-bank-org-*/_search?filter_path=aggregations
+GET json-call-center-bank-org-*/_search?filter_path=aggregations.data
 
 {
   "size": 0,
@@ -21,30 +21,25 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations
     }
   },
   "aggs": {
-
     "customer_group": {
       "terms": {
         "field": "record.cif.keyword",
         "size": 10000
       }
     },
-    "UniqueCustomerImpacted": {
-      "stats_bucket": {
-        "buckets_path": "customer_group._count"
-      }
-    },
-
     "agent_group": {
       "terms": {
         "field": "record.racf.keyword",
         "size": 10000
       }
     },
-    "UniqueAgentImpacted": {
+    "data": {
       "stats_bucket": {
-        "buckets_path": "agent_group._count"
+        "buckets_path": [
+          "customer_group._count",
+          "agent_group._count"
+        ]
       }
     }
-
   }
 }
