@@ -1,4 +1,5 @@
 GET json-call-center-bank-org-*/_search?filter_path=aggregations
+
 {
   "size": 0,
   "query": {
@@ -7,21 +8,43 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations
         { "term": { "record.dd.env.keyword": "prod" }},
         { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
         { "wildcard": { "record.CONTEXT_PATH.keyword": "*/dropdown/v1/data/dropdowns*" }},
-        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}}
+        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}},
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "now-7d/d",
+              "lte": "now"
+            }
+          }
+        }
       ]
     }
   },
   "aggs": {
-    "group_by_racf": {
+
+    "customer_group": {
+      "terms": {
+        "field": "record.cif.keyword",
+        "size": 10000
+      }
+    },
+    "UniqueCustomerImpacted": {
+      "stats_bucket": {
+        "buckets_path": "customer_group._count"
+      }
+    },
+
+    "agent_group": {
       "terms": {
         "field": "record.racf.keyword",
         "size": 10000
       }
     },
-    "uniqueAgentImpacted": {
-      "cardinality": {
-        "field": "record.racf.keyword"
+    "UniqueAgentImpacted": {
+      "stats_bucket": {
+        "buckets_path": "agent_group._count"
       }
     }
+
   }
 }
