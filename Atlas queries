@@ -21,25 +21,30 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations.data
     }
   },
   "aggs": {
+
     "customer_group": {
       "terms": {
         "field": "record.cif.keyword",
         "size": 10000
       }
     },
+
     "agent_group": {
       "terms": {
         "field": "record.racf.keyword",
         "size": 10000
       }
     },
+
     "data": {
-      "stats_bucket": {
-        "buckets_path": [
-          "customer_group._count",
-          "agent_group._count"
-        ]
+      "bucket_script": {
+        "buckets_path": {
+          "customerCount": "customer_group._bucket_count",
+          "agentCount": "agent_group._bucket_count"
+        },
+        "script": "params.customerCount + params.agentCount"
       }
     }
+
   }
 }
