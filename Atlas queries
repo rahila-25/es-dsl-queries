@@ -1,4 +1,4 @@
-GET json-call-center-bank-org-*/_search?filter_path=aggregations.total.sum
+GET json-call-center-bank-org-*/_search
 {
   "size": 0,
   "query": {
@@ -20,37 +20,65 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations.total.sum
     }
   },
   "aggs": {
-    "customer_unique_ids": {
-      "terms": {
-        "field": "record.cif.keyword",
-        "size": 10000
-      }
-    },
-    "customer_count": {
-      "stats_bucket": {
-        "buckets_path": "customer_unique_ids._count"
+
+    "business_impact": {
+      "filters": {
+        "filters": {
+
+          "customer_logic": {
+            "exists": {
+              "field": "record.cif.keyword"
+            }
+          },
+
+          "agent_logic": {
+            "exists": {
+              "field": "record.racf.keyword"
+            }
+          }
+
+        }
+      },
+
+      "aggs": {
+
+        "unique_ids": {
+          "terms": {
+            "field": "record.cif.keyword",
+            "size": 10000
+          }
+        },
+
+        "unique_agent_ids": {
+          "terms": {
+            "field": "record.racf.keyword",
+            "size": 10000
+          }
+        },
+
+        "customer_count": {
+          "stats_bucket": {
+            "buckets_path": "unique_ids._count"
+          }
+        },
+
+        "agent_count": {
+          "stats_bucket": {
+            "buckets_path": "unique_agent_ids._count"
+          }
+        }
+
       }
     },
 
-    "agent_unique_ids": {
-      "terms": {
-        "field": "record.racf.keyword",
-        "size": 10000
-      }
-    },
-    "agent_count": {
-      "stats_bucket": {
-        "buckets_path": "agent_unique_ids._count"
-      }
-    },
-
-    "total": {
+    "total_count": {
       "stats_bucket": {
         "buckets_path": [
-          "customer_count.count",
-          "agent_count.count"
+          "business_impact>customer_count.count",
+          "business_impact>agent_count.count"
         ]
       }
     }
+
   }
 }
