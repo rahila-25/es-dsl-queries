@@ -4,37 +4,15 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations.wrapper.buckets
   "query": {
     "bool": {
       "filter": [
-        { "term": { "record.dd.env.keyword": "prod" }},
-        { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
-        { "wildcard": { "record.CONTEXT_PATH.keyword": "*/dropdown/v1/data/dropdowns*" }},
-        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 }}},
-        {
-          "range": {
-            "@timestamp": {
-              "gte": "now-7d/d",
-              "lte": "now"
-            }
-          }
-        }
+        { "term": { "record.dd.env.keyword": "prod" } },
+        { "term": { "record.appName.keyword": "bank-atlas-platform-router" } },
+        { "wildcard": { "record.CONTEXT_PATH.keyword": "*/dropdown/v1/data/dropdowns*" } },
+        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500 } } },
+        { "range": { "@timestamp": { "gte": "now-7d/d", "lte": "now" } } }
       ]
     }
   },
   "aggs": {
-
-    "customer_group": {
-      "terms": {
-        "field": "record.cif.keyword",
-        "size": 10000
-      }
-    },
-
-    "agent_group": {
-      "terms": {
-        "field": "record.racf.keyword",
-        "size": 10000
-      }
-    },
-
     "wrapper": {
       "filters": {
         "filters": {
@@ -42,19 +20,28 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations.wrapper.buckets
         }
       },
       "aggs": {
-
+        "customer_group": {
+          "terms": {
+            "field": "record.cif.keyword",
+            "size": 10000
+          }
+        },
+        "agent_group": {
+          "terms": {
+            "field": "record.racf.keyword",
+            "size": 10000
+          }
+        },
         "customer_count": {
           "stats_bucket": {
             "buckets_path": "customer_group._count"
           }
         },
-
         "agent_count": {
           "stats_bucket": {
             "buckets_path": "agent_group._count"
           }
         },
-
         "total": {
           "bucket_script": {
             "buckets_path": {
@@ -64,9 +51,7 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations.wrapper.buckets
             "script": "params.c + params.a"
           }
         }
-
       }
     }
-
   }
 }
