@@ -1,4 +1,4 @@
-GET json-call-center-bank-org-*/_search?filter_path=aggregations.total.value
+GET json-call-center-bank-org-*/_search?filter_path=aggregations.wrapper.buckets.all.data
 {
   "size": 0,
   "query": {
@@ -47,13 +47,22 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations.total.value
       }
     },
 
-    "total": {
-      "bucket_script": {
-        "buckets_path": {
-          "c": "customer_count.sum",
-          "a": "agent_count.sum"
-        },
-        "script": "params.c + params.a"
+    "wrapper": {
+      "filters": {
+        "filters": {
+          "all": { "match_all": {} }
+        }
+      },
+      "aggs": {
+        "data": {
+          "bucket_script": {
+            "buckets_path": {
+              "c": "customer_count.sum",
+              "a": "agent_count.sum"
+            },
+            "script": "params.c + params.a"
+          }
+        }
       }
     }
 
