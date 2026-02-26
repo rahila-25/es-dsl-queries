@@ -20,7 +20,6 @@ GET json-call-center-bank-org-*/_search
     }
   },
   "aggs": {
-
     "business_impact": {
       "filters": {
         "filters": {
@@ -42,7 +41,7 @@ GET json-call-center-bank-org-*/_search
 
       "aggs": {
 
-        "unique_ids": {
+        "unique_customer_ids": {
           "terms": {
             "field": "record.cif.keyword",
             "size": 10000
@@ -56,13 +55,13 @@ GET json-call-center-bank-org-*/_search
           }
         },
 
-        "customer_count": {
+        "customer_results": {
           "stats_bucket": {
-            "buckets_path": "unique_ids._count"
+            "buckets_path": "unique_customer_ids._count"
           }
         },
 
-        "agent_count": {
+        "agent_results": {
           "stats_bucket": {
             "buckets_path": "unique_agent_ids._count"
           }
@@ -72,11 +71,12 @@ GET json-call-center-bank-org-*/_search
     },
 
     "total_count": {
-      "stats_bucket": {
-        "buckets_path": [
-          "business_impact>customer_count.count",
-          "business_impact>agent_count.count"
-        ]
+      "bucket_script": {
+        "buckets_path": {
+          "customer": "business_impact>customer_results.sum",
+          "agent": "business_impact>agent_results.sum"
+        },
+        "script": "params.customer + params.agent"
       }
     }
 
