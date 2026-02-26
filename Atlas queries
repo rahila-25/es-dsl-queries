@@ -23,28 +23,25 @@ GET json-call-center-bank-org-*/_search
     "business_impact": {
       "filters": {
         "filters": {
-
           "customer_logic": {
-            "exists": {
-              "field": "record.cif.keyword"
-            }
+            "exists": { "field": "record.cif.keyword" }
           },
-
           "agent_logic": {
-            "exists": {
-              "field": "record.racf.keyword"
-            }
+            "exists": { "field": "record.racf.keyword" }
           }
-
         }
       },
-
       "aggs": {
 
         "unique_customer_ids": {
           "terms": {
             "field": "record.cif.keyword",
             "size": 10000
+          }
+        },
+        "customer_results": {
+          "stats_bucket": {
+            "buckets_path": "unique_customer_ids._count"
           }
         },
 
@@ -54,31 +51,23 @@ GET json-call-center-bank-org-*/_search
             "size": 10000
           }
         },
-
-        "customer_results": {
-          "stats_bucket": {
-            "buckets_path": "unique_customer_ids._count"
-          }
-        },
-
         "agent_results": {
           "stats_bucket": {
             "buckets_path": "unique_agent_ids._count"
           }
+        },
+
+        "total_count": {
+          "bucket_script": {
+            "buckets_path": {
+              "customer": "customer_results.sum",
+              "agent": "agent_results.sum"
+            },
+            "script": "params.customer + params.agent"
+          }
         }
 
       }
-    },
-
-    "total_count": {
-      "bucket_script": {
-        "buckets_path": {
-          "customer": "business_impact>customer_results.sum",
-          "agent": "business_impact>agent_results.sum"
-        },
-        "script": "params.customer + params.agent"
-      }
     }
-
   }
 }
