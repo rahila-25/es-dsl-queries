@@ -1,9 +1,9 @@
-GET json-call-center-bank-org-*/_search?filter_path=aggregations.wrapper.buckets.all.data
+GET json-call-center-bank-org-*/_search?filter_path=aggregations.wrapper.buckets.all.total.value
 {
   "size": 0,
   "query": {
     "bool": {
-      "must": [
+      "filter": [
         { "term": { "record.dd.env.keyword": "prod" }},
         { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
         { "wildcard": { "record.CONTEXT_PATH.keyword": "*/dropdown/v1/data/dropdowns*" }},
@@ -28,22 +28,10 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations.wrapper.buckets
       }
     },
 
-    "customer_count": {
-      "stats_bucket": {
-        "buckets_path": "customer_group._count"
-      }
-    },
-
     "agent_group": {
       "terms": {
         "field": "record.racf.keyword",
         "size": 10000
-      }
-    },
-
-    "agent_count": {
-      "stats_bucket": {
-        "buckets_path": "agent_group._count"
       }
     },
 
@@ -54,15 +42,29 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations.wrapper.buckets
         }
       },
       "aggs": {
-        "data": {
+
+        "customer_count": {
+          "stats_bucket": {
+            "buckets_path": "customer_group._count"
+          }
+        },
+
+        "agent_count": {
+          "stats_bucket": {
+            "buckets_path": "agent_group._count"
+          }
+        },
+
+        "total": {
           "bucket_script": {
             "buckets_path": {
-              "c": "customer_count.sum",
-              "a": "agent_count.sum"
+              "c": "customer_count.count",
+              "a": "agent_count.count"
             },
             "script": "params.c + params.a"
           }
         }
+
       }
     }
 
