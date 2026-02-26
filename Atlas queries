@@ -1,4 +1,4 @@
-GET json-call-center-bank-org-*/_search?filter_path=aggregations.total.buckets.all_docs.data
+GET json-call-center-bank-org-*/_search?filter_path=aggregations.total.value
 {
   "size": 0,
   "query": {
@@ -20,45 +20,42 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations.total.buckets.a
     }
   },
   "aggs": {
+
     "customer_group": {
       "terms": {
         "field": "record.cif.keyword",
         "size": 10000
       }
     },
+
     "customer_count": {
       "stats_bucket": {
         "buckets_path": "customer_group._count"
       }
     },
+
     "agent_group": {
       "terms": {
         "field": "record.racf.keyword",
         "size": 10000
       }
     },
+
     "agent_count": {
       "stats_bucket": {
         "buckets_path": "agent_group._count"
       }
     },
+
     "total": {
-      "filters": {
-        "filters": {
-          "all_docs": { "match_all": {} }
-        }
-      },
-      "aggs": {
-        "data": {
-          "bucket_script": {
-            "buckets_path": {
-              "c": "customer_count.sum",
-              "a": "agent_count.sum"
-            },
-            "script": "params.c + params.a"
-          }
-        }
+      "bucket_script": {
+        "buckets_path": {
+          "c": "customer_count.sum",
+          "a": "agent_count.sum"
+        },
+        "script": "params.c + params.a"
       }
     }
+
   }
 }
