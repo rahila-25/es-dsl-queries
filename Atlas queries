@@ -1,9 +1,9 @@
-GET json-call-center-bank-org-*/_search
+GET json-call-center-bank-org-*/_search?filter_path=aggregations.total.buckets.all_docs.data
 {
   "size": 0,
   "query": {
     "bool": {
-      "filter": [
+      "must": [
         { "term": { "record.dd.env.keyword": "prod" }},
         { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
         { "wildcard": { "record.CONTEXT_PATH.keyword": "*/dropdown/v1/data/dropdowns*" }},
@@ -20,53 +20,44 @@ GET json-call-center-bank-org-*/_search
     }
   },
   "aggs": {
-    "business_impact": {
+    "customer_group": {
+      "terms": {
+        "field": "record.cif.keyword",
+        "size": 10000
+      }
+    },
+    "customer_count": {
+      "stats_bucket": {
+        "buckets_path": "customer_group._count"
+      }
+    },
+    "agent_group": {
+      "terms": {
+        "field": "record.racf.keyword",
+        "size": 10000
+      }
+    },
+    "agent_count": {
+      "stats_bucket": {
+        "buckets_path": "agent_group._count"
+      }
+    },
+    "total": {
       "filters": {
         "filters": {
-          "customer_logic": {
-            "exists": { "field": "record.cif.keyword" }
-          },
-          "agent_logic": {
-            "exists": { "field": "record.racf.keyword" }
-          }
+          "all_docs": { "match_all": {} }
         }
       },
       "aggs": {
-
-        "unique_customer_ids": {
-          "terms": {
-            "field": "record.cif.keyword",
-            "size": 10000
-          }
-        },
-        "customer_results": {
-          "stats_bucket": {
-            "buckets_path": "unique_customer_ids._count"
-          }
-        },
-
-        "unique_agent_ids": {
-          "terms": {
-            "field": "record.racf.keyword",
-            "size": 10000
-          }
-        },
-        "agent_results": {
-          "stats_bucket": {
-            "buckets_path": "unique_agent_ids._count"
-          }
-        },
-
-        "total_count": {
+        "data": {
           "bucket_script": {
             "buckets_path": {
-              "customer": "customer_results.sum",
-              "agent": "agent_results.sum"
+              "c": "customer_count.sum",
+              "a": "agent_count.sum"
             },
-            "script": "params.customer + params.agent"
+            "script": "params.c + params.a"
           }
         }
-
       }
     }
   }
