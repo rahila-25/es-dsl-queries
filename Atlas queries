@@ -1,10 +1,9 @@
-GET json-call-center-bank-org-*/_search?filter_path=aggregations.total.data
-
+GET json-call-center-bank-org-*/_search?filter_path=aggregations.total.sum
 {
   "size": 0,
   "query": {
     "bool": {
-      "must": [
+      "filter": [
         { "term": { "record.dd.env.keyword": "prod" }},
         { "term": { "record.appName.keyword": "bank-atlas-platform-router" }},
         { "wildcard": { "record.CONTEXT_PATH.keyword": "*/dropdown/v1/data/dropdowns*" }},
@@ -21,36 +20,36 @@ GET json-call-center-bank-org-*/_search?filter_path=aggregations.total.data
     }
   },
   "aggs": {
+    "customer_unique_ids": {
+      "terms": {
+        "field": "record.cif.keyword",
+        "size": 10000
+      }
+    },
+    "customer_count": {
+      "stats_bucket": {
+        "buckets_path": "customer_unique_ids._count"
+      }
+    },
+
+    "agent_unique_ids": {
+      "terms": {
+        "field": "record.racf.keyword",
+        "size": 10000
+      }
+    },
+    "agent_count": {
+      "stats_bucket": {
+        "buckets_path": "agent_unique_ids._count"
+      }
+    },
+
     "total": {
-      "filters": {
-        "filters": {
-          "all_docs": { "match_all": {} }
-        }
-      },
-      "aggs": {
-
-        "customer_count": {
-          "cardinality": {
-            "field": "record.cif.keyword"
-          }
-        },
-
-        "agent_count": {
-          "cardinality": {
-            "field": "record.racf.keyword"
-          }
-        },
-
-        "data": {
-          "bucket_script": {
-            "buckets_path": {
-              "c": "customer_count",
-              "a": "agent_count"
-            },
-            "script": "params.c + params.a"
-          }
-        }
-
+      "stats_bucket": {
+        "buckets_path": [
+          "customer_count.count",
+          "agent_count.count"
+        ]
       }
     }
   }
