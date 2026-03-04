@@ -1,13 +1,82 @@
-Our current focus is on building the DTA page to show the actual number of unique customers impacted for each application. The idea is to create clear visibility through a dashboard so teams can quickly see which applications are impacted and take action to reduce it.
-
-
-At the moment, I'm working on 14 applications in total:
-
-4 applications are completed
-3 are now reflected on the DTA page
-1 is currently in progress
-4 are blocked due to dependencies (identifiers / query inputs)
-The remaining are pending required validations
-
-I'm actively following up to unblock dependencies and ensure all queries are aligned and validated.
-Overall, the goal is to ensure the impact numbers are accurate and fully aligned with the Severity Matrix so that monitoring and escalation are based on real data.
+GET json-verus-engineering-*/_search?filter_path=aggregations.count
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "record.CONTEXT_PATH.keyword": "/bank/deposits/pay/zelle/v1/enrollment"
+          }
+        },
+        {
+          "term": {
+            "record.appName.keyword": "auth-edge-router-bank-deposits"
+          }
+        },
+        {
+          "term": {
+            "record.AGGREGATOR.keyword": "false"
+          }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "wildcard": {
+                  "message.keyword": "*X-Client-Platform : Android*"
+                }
+              },
+              {
+                "wildcard": {
+                  "message.keyword": "*X-Client-Platform : iPhone*"
+                }
+              },
+              {
+                "wildcard": {
+                  "message.keyword": "*X-Client-Platform : iPad*"
+                }
+              },
+              {
+                "wildcard": {
+                  "message.keyword": "*X-Client-Platform : Android_Tablet*"
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        },
+        {
+          "range": {
+            "record.HTTP_STATUS_CODE_int": {
+              "gte": 500,
+              "lte": 599
+            }
+          }
+        },
+        {
+          "range": {
+            "@timestamp": {
+              "gte": 1772626330,
+              "lte": 1772627230,
+              "format": "epoch_second"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "unique_users_buckets": {
+      "terms": {
+        "field": "Cust-Reg-ID",
+        "size": 100000
+      }
+    },
+    "count": {
+      "stats_bucket": {
+        "buckets_path": "unique_users_buckets._count"
+      }
+    }
+  }
+}
