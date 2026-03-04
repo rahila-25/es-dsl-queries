@@ -22,26 +22,10 @@ GET json-verus-engineering-*/_search?filter_path=aggregations.count
         {
           "bool": {
             "should": [
-              {
-                "wildcard": {
-                  "message.keyword": "*X-Client-Platform : Android*"
-                }
-              },
-              {
-                "wildcard": {
-                  "message.keyword": "*X-Client-Platform : iPhone*"
-                }
-              },
-              {
-                "wildcard": {
-                  "message.keyword": "*X-Client-Platform : iPad*"
-                }
-              },
-              {
-                "wildcard": {
-                  "message.keyword": "*X-Client-Platform : Android_Tablet*"
-                }
-              }
+              { "wildcard": { "message": "*X-Client-Platform : Android*" }},
+              { "wildcard": { "message": "*X-Client-Platform : iPhone*" }},
+              { "wildcard": { "message": "*X-Client-Platform : iPad*" }},
+              { "wildcard": { "message": "*X-Client-Platform : Android_Tablet*" }}
             ],
             "minimum_should_match": 1
           }
