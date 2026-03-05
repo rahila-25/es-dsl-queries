@@ -1,21 +1,17 @@
-GET logs-*/_search?filter_path=aggregations.unique_cifid.value
+GET json-verus-engineering-*/_search?filter_path=aggregations.unique_cust_reg_id.value
 {
   "size": 0,
   "query": {
     "bool": {
       "filter": [
-        { "term": { "kubernetes.namespace.keyword": "mobile-check-deposit-prod" } },
         {
-          "terms": {
-            "message.keyword": [
-              "Enrollment status requested",
-              "Enroll operation requested",
-              "Deposit limit requested",
-              "Verify deposit requested",
-              "Submit deposit requested"
-            ]
+          "wildcard": {
+            "record.CONTEXT_PATH.keyword": "/bank/deposits/servicing/documents/v1/accounts/*/statements/*"
           }
         },
+        { "term": { "record.appName.keyword": "auth-edge-router-bank-deposits" } },
+        { "term": { "record.AGGREGATOR.keyword": "false" } },
+        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500, "lte": 599 } } },
         {
           "range": {
             "@timestamp": {
@@ -29,9 +25,9 @@ GET logs-*/_search?filter_path=aggregations.unique_cifid.value
     }
   },
   "aggs": {
-    "unique_cifid": {
+    "unique_cust_reg_id": {
       "cardinality": {
-        "field": "cifId.keyword",
+        "field": "Cust-Reg-ID",
         "precision_threshold": 40000
       }
     }
