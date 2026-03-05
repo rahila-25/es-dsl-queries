@@ -1,8 +1,26 @@
-FROM logs-*
-| WHERE cls.application == "epp-settlement-batch-filetransfer"
-  AND cls.environment LIKE "prod%"
-  AND level == "ERROR"
-  AND message LIKE "*Missed_Business_SLA*"
-| KEEP @timestamp, cls.application, cls.environment, level, message
-| SORT @timestamp DESC
-| LIMIT 100
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "{{start}}",
+              "lte": "{{end}}",
+              "format": "epoch_second"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "unique_regid_count": {
+      "cardinality": {
+        "field": "record.REGID.keyword",
+        "precision_threshold": 40000
+      }
+    }
+  }
+}
