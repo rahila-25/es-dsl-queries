@@ -1,13 +1,14 @@
-GET json-c360-authentication-org-*/_search
+GET json-verus-engineering-*/_search?filter_path=aggregations.unique_cust_reg_id.value
 {
   "size": 0,
   "query": {
     "bool": {
       "filter": [
-        { "term": { "record.UserAgent.keyword": "MOBILE" } },
-        { "term": { "record.USERTYPE.keyword": "B" } },
-        { "term": { "record.appName.keyword": "universal-customer-login-api" } },
-        { "term": { "record.AGGREGATOR_bool.keyword": "false" } },
+        { "term": { "record.CONTEXT_PATH.keyword": "/bank/deposits/pay/transfer/create/v1/create" } },
+        { "term": { "record.appName.keyword": "auth-edge-router-bank-deposits" } },
+        { "term": { "record.AGGREGATOR.keyword": "false" } },
+        { "term": { "record.Client.keyword": "Mobile-App" } },
+        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500, "lte": 599 } } },
         {
           "range": {
             "@timestamp": {
@@ -21,9 +22,9 @@ GET json-c360-authentication-org-*/_search
     }
   },
   "aggs": {
-    "unique_regid_count": {
+    "unique_cust_reg_id": {
       "cardinality": {
-        "field": "record.REGID.keyword",
+        "field": "Cust-Reg-ID",
         "precision_threshold": 40000
       }
     }
