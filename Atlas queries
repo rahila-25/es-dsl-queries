@@ -1,13 +1,18 @@
+GET json-c360-authentication-org-*/_search
 {
   "size": 0,
   "query": {
     "bool": {
       "filter": [
+        { "term": { "record.UserAgent.keyword": "MOBILE" } },
+        { "term": { "record.USERTYPE.keyword": "B" } },
+        { "term": { "record.appName.keyword": "universal-customer-login-api" } },
+        { "term": { "record.AGGREGATOR_bool.keyword": "false" } },
         {
           "range": {
             "@timestamp": {
-              "gte": "{{start}}",
-              "lte": "{{end}}",
+              "gte": {{start}},
+              "lte": {{end}},
               "format": "epoch_second"
             }
           }
