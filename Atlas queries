@@ -1,66 +1,8 @@
-GET json-verus-engineering-*/_search?filter_path=aggregations.count
-{
-  "size": 0,
-  "query": {
-    "bool": {
-      "must": [
-        {
-          "term": {
-            "record.CONTEXT_PATH.keyword": "/bank/deposits/pay/zelle/v1/enrollment"
-          }
-        },
-        {
-          "term": {
-            "record.appName.keyword": "auth-edge-router-bank-deposits"
-          }
-        },
-        {
-          "term": {
-            "record.AGGREGATOR.keyword": "false"
-          }
-        },
-        {
-          "bool": {
-            "should": [
-              { "wildcard": { "message": "*X-Client-Platform : Android*" }},
-              { "wildcard": { "message": "*X-Client-Platform : iPhone*" }},
-              { "wildcard": { "message": "*X-Client-Platform : iPad*" }},
-              { "wildcard": { "message": "*X-Client-Platform : Android_Tablet*" }}
-            ],
-            "minimum_should_match": 1
-          }
-        },
-        {
-          "range": {
-            "record.HTTP_STATUS_CODE_int": {
-              "gte": 500,
-              "lte": 599
-            }
-          }
-        },
-        {
-          "range": {
-            "@timestamp": {
-              "gte": 1772626330,
-              "lte": 1772627230,
-              "format": "epoch_second"
-            }
-          }
-        }
-      ]
-    }
-  },
-  "aggs": {
-    "unique_users_buckets": {
-      "terms": {
-        "field": "Cust-Reg-ID",
-        "size": 100000
-      }
-    },
-    "count": {
-      "stats_bucket": {
-        "buckets_path": "unique_users_buckets._count"
-      }
-    }
-  }
-}
+FROM logs-*
+| WHERE cls.application == "epp-settlement-batch-filetransfer"
+  AND cls.environment LIKE "prod%"
+  AND level == "ERROR"
+  AND message LIKE "*Missed_Business_SLA*"
+| KEEP @timestamp, cls.application, cls.environment, level, message
+| SORT @timestamp DESC
+| LIMIT 100
