@@ -4,13 +4,20 @@ GET json-verus-engineering-*/_search?filter_path=aggregations.unique_cust_reg_id
   "query": {
     "bool": {
       "filter": [
-        {
-          "wildcard": {
-            "record.CONTEXT_PATH.keyword": "/bank/deposits/servicing/documents/v1/accounts/*/statements/*"
-          }
-        },
+        { "term": { "record.CONTEXT_PATH.keyword": "/bank/deposits/pay/zelle/v1/enrollment" } },
         { "term": { "record.appName.keyword": "auth-edge-router-bank-deposits" } },
         { "term": { "record.AGGREGATOR.keyword": "false" } },
+        {
+          "bool": {
+            "should": [
+              { "match_phrase": { "message": "X-Client-Platform : Android" } },
+              { "match_phrase": { "message": "X-Client-Platform : iPhone" } },
+              { "match_phrase": { "message": "X-Client-Platform : iPad" } },
+              { "match_phrase": { "message": "X-Client-Platform : Android_Tablet" } }
+            ],
+            "minimum_should_match": 1
+          }
+        },
         { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500, "lte": 599 } } },
         {
           "range": {
