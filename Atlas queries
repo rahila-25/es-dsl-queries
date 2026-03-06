@@ -1,6 +1,7 @@
 GET logs-*/_search
 {
   "size": 0,
+  "track_total_hits": true,
   "query": {
     "bool": {
       "must": [
@@ -20,22 +21,11 @@ GET logs-*/_search
           }
         },
         {
-          "wildcard": {
-            "message": "*Missed*Business*SLA*"
-          }
-        }
-      ],
-      "filter": [
-        {
-          "range": {
-            "@timestamp": {
-              "gte": "now-24h",
-              "lte": "now"
-            }
+          "match_phrase": {
+            "message": "Missed Business SLA"
           }
         }
       ]
     }
-  },
-  "track_total_hits": true
+  }
 }
