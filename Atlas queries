@@ -1,42 +1,30 @@
-GET json-verus-engineering-*/_search?filter_path=aggregations.unique_cust_reg_id.value
+GET logs-*/_search
 {
   "size": 0,
   "query": {
     "bool": {
-      "filter": [
-        { "term": { "record.CONTEXT_PATH.keyword": "/bank/deposits/pay/zelle/v1/enrollment" } },
-        { "term": { "record.appName.keyword": "auth-edge-router-bank-deposits" } },
-        { "term": { "record.AGGREGATOR.keyword": "false" } },
+      "must": [
         {
-          "bool": {
-            "should": [
-              { "match_phrase": { "message": "X-Client-Platform : Android" } },
-              { "match_phrase": { "message": "X-Client-Platform : iPhone" } },
-              { "match_phrase": { "message": "X-Client-Platform : iPad" } },
-              { "match_phrase": { "message": "X-Client-Platform : Android_Tablet" } }
-            ],
-            "minimum_should_match": 1
+          "term": {
+            "cls.application.keyword": "epp-settlement-batch-filetransfer"
           }
         },
-        { "range": { "record.HTTP_STATUS_CODE_int": { "gte": 500, "lte": 599 } } },
         {
-          "range": {
-            "@timestamp": {
-              "gte": {{start}},
-              "lte": {{end}},
-              "format": "epoch_second"
-            }
+          "term": {
+            "cls.environment.keyword": "prod"
+          }
+        },
+        {
+          "term": {
+            "level.keyword": "ERROR"
+          }
+        },
+        {
+          "match_phrase": {
+            "message": "Missed Business SLA"
           }
         }
       ]
-    }
-  },
-  "aggs": {
-    "unique_cust_reg_id": {
-      "cardinality": {
-        "field": "Cust-Reg-ID",
-        "precision_threshold": 40000
-      }
     }
   }
 }
