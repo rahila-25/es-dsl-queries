@@ -1,6 +1,6 @@
 GET logs-*/_search
 {
-  "size": 0,
+  "size": 20,
   "query": {
     "bool": {
       "must": [
@@ -21,11 +21,7 @@ GET logs-*/_search
       ]
     }
   },
-  "aggs": {
-    "impact_count": {
-      "value_count": {
-        "field": "message.keyword"
-      }
-    }
-  }
+  "sort": [
+    { "@timestamp": "desc" }
+  ]
 }
