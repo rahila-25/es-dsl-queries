@@ -4,27 +4,18 @@ GET logs-*/_search
   "query": {
     "bool": {
       "must": [
-        {
-          "term": {
-            "cls.application.keyword": "epp-settlement-batch-filetransfer"
-          }
-        },
-        {
-          "term": {
-            "cls.environment.keyword": "prod"
-          }
-        },
-        {
-          "term": {
-            "level.keyword": "ERROR"
-          }
-        },
-        {
-          "match_phrase": {
-            "message": "Missed Business SLA"
-          }
-        }
+        { "term": { "cls.application.keyword": "epp-settlement-batch-filetransfer" }},
+        { "wildcard": { "cls.environment.keyword": "prod*" }},
+        { "term": { "level.keyword": "ERROR" }},
+        { "wildcard": { "message": "*Missed*Business*SLA*" }}
       ]
+    }
+  },
+  "aggs": {
+    "sla_failures": {
+      "value_count": {
+        "field": "message.keyword"
+      }
     }
   }
 }
