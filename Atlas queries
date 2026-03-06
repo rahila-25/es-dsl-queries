@@ -1,14 +1,22 @@
 GET logs-*/_search
 {
+  "size": 0,
+  "track_total_hits": true,
   "query": {
     "bool": {
       "must": [
-        { "term": { "cls.application.keyword": "epp-settlement-batch-filetransfer" }},
-        { "term": { "cls.environment.keyword": "prod" }},
+        { "match": { "cls.application.keyword": "epp-settlement-batch-filetransfer" }},
+        { "wildcard": { "cls.environment.keyword": "prod*" }},
         { "term": { "level.keyword": "ERROR" }},
+        { "match_phrase": { "message": "Missed Business SLA" }}
+      ],
+      "filter": [
         {
-          "wildcard": {
-            "message.keyword": "*Missed Business SLA*"
+          "range": {
+            "@timestamp": {
+              "gte": "now-24h",
+              "lte": "now"
+            }
           }
         }
       ]
