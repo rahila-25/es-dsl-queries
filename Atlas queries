@@ -1,27 +1,7 @@
-GET logs-*/_search
-{
-  "size": 20,
-  "query": {
-    "bool": {
-      "must": [
-        { "term": { "cls.application.keyword": "epp-settlement-batch-filetransfer" }},
-        { "wildcard": { "cls.environment.keyword": "prod*" }},
-        { "term": { "level.keyword": "ERROR" }},
-        { "match_phrase": { "message": "Missed Business SLA" }}
-      ],
-      "filter": [
-        {
-          "range": {
-            "@timestamp": {
-              "gte": "now-7d",
-              "lte": "now"
-            }
-          }
-        }
-      ]
-    }
-  },
-  "sort": [
-    { "@timestamp": "desc" }
-  ]
-}
+FROM logs-*
+| WHERE cls.application == "epp-settlement-batch-filetransfer"
+  AND cls.environment LIKE "prod%"
+  AND level == "ERROR"
+  AND message LIKE "*Missed Business SLA*"
+  AND @timestamp >= NOW() - 30 DAYS
+| STATS impact_count = COUNT(message)
